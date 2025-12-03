@@ -3,59 +3,53 @@ import numpy as np
 import control as c
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
+from scipy.integrate import odeint
 
 # given parameters
-m1=1 # kg, mass of cart (M)
-m2=0.5 # kg, mass at end of rod (m)
-mtot=m1+m2
+M=1 # kg, mass of cart (M)
+m=0.5 # kg, mass at end of rod (m)
+
 l=0.4 # m, length of pendulum
 b=0.01 # Ns/m, friction constant 
-g=9.8 # m/s^2, gravity 
+g=9.8 # m/s^2, gravity
+
+F = 0
 
 t_span=(0, 5)  # from t=0 to t=5
 t_eval=np.linspace(t_span[0], t_span[1], 100)  # evaluation points
 
 
-def sys(t, x): 
+# Solve the differential equations
+def dSdx(x, S):
+    x1, x2, x3, x4 = S
+    return [x2, 
+            (F - b*x2 - m*x4**2*l*np.sin(x3) + m*g*np.sin(x3)*np.cos(x3)) / ((M+m) - m*np.cos(x3)**2),
+            x4,
+            ((g*np.sin(x3)) / l) + (np.cos(x3)/l)*((F - b*x2 - m*x4**2*l*np.sin(x3) + m*g*np.sin(x3)*np.cos(x3)) / ((M+m) - m*np.cos(x3)**2))]
 
-    x1, x2, x3, x4 = x
-    # given parameters
-    m1=1 # kg, mass of cart (M)
-    m2=0.5 # kg, mass at end of rod (m)
-    mtot=m1+m2
-    l=0.4 # m, length of pendulum
-    b=0.01 # Ns/m, friction constant 
-    F=0 # forcing 
-    g=9.8 # m/s^2, gravity 
-
-
-    dx1=x2
-    dx2=(1/mtot)*(F-((m1*g/2)*np.sin(2*x3))+(m1*l*x4**2*np.sin(x3))-(b*x2))/(1-((m1*np.cos(x3)**2)/mtot))
-    dx3=x4
-    dx4=(g*np.sin(x3)-dx2*np.cos(x3))/l
-    
-    return [dx1, dx2, dx3, dx4]
-
-x0=[0, 0, 5, 0]
-
-sol=solve_ivp(sys, t_span, x0, t_eval=t_eval, method='RK45')
-t=sol.t
-y=sol.y
+x1_0 = 0
+x2_0 = 0
+x3_0 = np.deg2rad(5)
+x4_0 = 0
+x0 = [x1_0, x2_0, x3_0, x4_0]
+S_0 = (x1_0, x2_0, x3_0, x4_0)
+t = np.linspace(0,5,1000)
+sol = odeint(dSdx, y0 = S_0, t=t, tfirst=True)
+y = sol.T
 
 
-
-print("Integration successful:", sol.success)
-print(f"Number of function evaluations: {sol.nfev}")
-print(f"\nInitial conditions:")
-print(f"  Cart position: {x0[0]} m")
-print(f"  Cart velocity: {x0[1]} m/s")
-print(f"  Pendulum angle: {x0[2]} rad ({np.degrees(x0[2]):.1f}°)")
-print(f"  Angular velocity: {x0[3]} rad/s")
-print(f"\nFinal values at t = {t[-1]:.2f}s:")
-print(f"  Cart position: {y[0][-1]:.4f} m")
-print(f"  Cart velocity: {y[1][-1]:.4f} m/s")
-print(f"  Pendulum angle: {y[2][-1]:.4f} rad ({np.degrees(y[2][-1]):.1f}°)")
-print(f"  Angular velocity: {y[3][-1]:.4f} rad/s")
+# print("Integration successful:", sol.success)
+# print(f"Number of function evaluations: {sol.nfev}")
+# print(f"\nInitial conditions:")
+# print(f"  Cart position: {x0[0]} m")
+# print(f"  Cart velocity: {x0[1]} m/s")
+# print(f"  Pendulum angle: {x0[2]} rad ({np.degrees(x0[2]):.1f}°)")
+# print(f"  Angular velocity: {x0[3]} rad/s")
+# print(f"\nFinal values at t = {t[-1]:.2f}s:")
+# print(f"  Cart position: {y[0][-1]:.4f} m")
+# print(f"  Cart velocity: {y[1][-1]:.4f} m/s")
+# print(f"  Pendulum angle: {y[2][-1]:.4f} rad ({np.degrees(y[2][-1]):.1f}°)")
+# print(f"  Angular velocity: {y[3][-1]:.4f} rad/s")
 
 # Plot the results
 fig, axes = plt.subplots(2, 2, figsize=(12, 8))
