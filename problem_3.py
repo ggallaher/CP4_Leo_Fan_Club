@@ -100,7 +100,7 @@ x_dot = sol.y[1]
 theta = sol.y[2]
 theta_dot = sol.y[3]
 y_cart = 0
-t = np.linspace(0,5,5000)
+t = np.linspace(0,10,1000)
 
 # Convert to degrees
 theta_deg = theta * (180 / np.pi)
