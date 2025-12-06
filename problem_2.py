@@ -38,7 +38,7 @@ print(f"\nOpen-loop eigenvalues: {eigenvalues}")
 print(f"Unstable modes: {np.sum(eigenvalues.real > 0)}")
 
 
-Q=np.array([[10, 0, 0, 0], [0, 1, 0, 0], [0, 0, 2000, 0], [0, 0, 0, 10]])
+Q=np.array([[10, 0, 0, 0], [0, 1, 0, 0], [0, 0, 5000, 0], [0, 0, 0, 10]])
 R=1
 
 
