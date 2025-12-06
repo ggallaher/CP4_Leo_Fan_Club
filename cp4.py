@@ -14,17 +14,17 @@ from scipy.integrate import odeint
 g = 9.807
 M = 1.0
 m = 0.5
-b = 0.01
+b = 0.0
 l = 0.4
-F = 0.5
+F = 0
 
 # Solve the differential equations
 def dSdx(x, S):
     x1, x2, x3, x4 = S
     return [x2, 
-            (F - b*x2 - m*x4**2*l*np.sin(x3) + m*g*np.sin(x3)*np.cos(x3)) / ((M+m) - m*np.cos(x3)**2),
+            (F - b*x2 + m*x4**2*l*np.sin(x3) - m*g*np.sin(x3)*np.cos(x3)) / ((M+m) - m*np.cos(x3)**2),
             x4,
-            ((g*np.sin(x3)) / l) + (np.cos(x3)/l)*((F - b*x2 - m*x4**2*l*np.sin(x3) + m*g*np.sin(x3)*np.cos(x3)) / ((M+m) - m*np.cos(x3)**2))]
+            ((g*np.sin(x3)) / l) - (np.cos(x3)/l)*((F - b*x2 + m*x4**2*l*np.sin(x3) - m*g*np.sin(x3)*np.cos(x3)) / ((M+m) - m*np.cos(x3)**2))]
 
 x1_0 = 0
 x2_0 = 0
@@ -39,8 +39,8 @@ plt.close('all')
 # Simulation data
 xdata = sol.T[0]          # Cart position
 xvelo = sol.T[1]         # Cart velocity
-theta = -1*sol.T[2]          # pendulum angle
-theta_dot = -1*sol.T[3]     # Pendulum angular velocity
+theta = sol.T[2]          # pendulum angle
+theta_dot = sol.T[3]     # Pendulum angular velocity
 y_cart = 0.0              # cart always on ground
 
 
@@ -92,14 +92,14 @@ ax.axis('off')
 ax.hlines(0, xmin, xmax, colors='k', linewidth=2)
 
 # Cart
-width, height = 2.0, 1.0
+width, height = 4.0, 2.0
 cart = Rectangle((xdata[0], y_cart), width, height,
                  linewidth=1, edgecolor='k', facecolor='k')
 ax.add_patch(cart)
 
 # Pendulum
-pendulum_length = 2.0
-pendulum_line = Line2D([], [], linewidth=10, color='#F2DC18')
+pendulum_length = 3
+pendulum_line = Line2D([], [], linewidth=8, color='#F2DC18')
 ax.add_line(pendulum_line)
 
 def init():
@@ -133,7 +133,8 @@ def update(frame):
     return cart, pendulum_line
 
 # Use time vector for real-time-ish playback
-dt = np.mean(np.diff(t))       
+dt = np.mean(np.diff(t))   
+fps = len(t) / t[-1]              # frames / total_time = 100 / 5 = 20    
 ani = a.FuncAnimation(
     fig,
     update,
@@ -142,5 +143,6 @@ ani = a.FuncAnimation(
     blit=True,
     interval=dt * 1000.0        
 )
+ani.save('simulation_5_seconds.mp4', writer='ffmpeg', fps=fps)
 
 plt.show()
