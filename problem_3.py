@@ -6,9 +6,6 @@ import matplotlib.animation as a
 from matplotlib.patches import Rectangle
 from matplotlib.lines import Line2D
 from scipy.integrate import odeint
-
-import numpy as np
-import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
 # --- Adjustable parameters ---
