@@ -172,7 +172,7 @@ ani = a.FuncAnimation(
     blit=True,
     interval=dt * 1000.0        
 )
-# ani.save('simulation_controlled_10_degrees.mp4', writer='ffmpeg', fps=fps)
+ani.save('simulation_controlled_10_degrees.mp4', writer='ffmpeg', fps=fps)
 
 
 # Compute control input for plotting
