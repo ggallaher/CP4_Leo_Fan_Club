@@ -95,9 +95,81 @@ x = sol.y[0]
 x_dot = sol.y[1]
 theta = sol.y[2]
 theta_dot = sol.y[3]
+y_cart = 0
+t = np.linspace(0,5,5000)
 
 # Convert to degrees
 theta_deg = theta * (180 / np.pi)
+
+
+############################################## Animate Results ###################################
+# Set up the animation
+# Q1 Animation (cart + inverted pendulum)
+xmin, xmax = -6, 8
+
+fig, ax = plt.subplots(figsize=(8, 4))
+ax.set_aspect('equal', adjustable='box')
+ax.set_xlim(xmin, xmax)
+ax.set_ylim(-1, 15)
+ax.axis('off')
+
+# Ground line (static)
+ax.hlines(0, xmin, xmax, colors='k', linewidth=2)
+
+# Cart
+width, height = 4.0, 2.0
+cart = Rectangle((x[0], y_cart), width, height,
+                 linewidth=1, edgecolor='k', facecolor='k')
+ax.add_patch(cart)
+
+# Pendulum
+pendulum_length = 3
+pendulum_line = Line2D([], [], linewidth=8, color='#F2DC18')
+ax.add_line(pendulum_line)
+
+def init():
+    cart.set_xy((x[0], y_cart))
+
+    px = x[0] + width / 2
+    py = y_cart + height
+    x_tip = px + pendulum_length * np.sin(theta[0])
+    y_tip = py + pendulum_length * np.cos(theta[0])
+    pendulum_line.set_data([px, x_tip], [py, y_tip])
+
+    return cart, pendulum_line
+
+def update(frame):
+    x_val = x[frame]
+    ang = theta[frame]
+
+    # Move cart
+    cart.set_xy((x_val, y_cart))
+
+    # Cart top center
+    px = x_val + width / 2.0
+    py = y_cart + height
+
+    # Pendulum tip
+    x_tip = px + pendulum_length * np.sin(ang)
+    y_tip = py + pendulum_length * np.cos(ang)
+
+    pendulum_line.set_data([px, x_tip], [py, y_tip])
+
+    return cart, pendulum_line
+
+# Use time vector for real-time-ish playback
+dt = np.mean(np.diff(t))   
+fps = len(t) / t[-1]              # frames / total_time = 100 / 5 = 20    
+ani = a.FuncAnimation(
+    fig,
+    update,
+    frames=len(x),
+    init_func=init,
+    blit=True,
+    interval=dt * 1000.0        
+)
+ani.save('simulation_controlled_10_degrees.mp4', writer='ffmpeg', fps=fps)
+
 
 # Compute control input for plotting
 u_trajectory = []
